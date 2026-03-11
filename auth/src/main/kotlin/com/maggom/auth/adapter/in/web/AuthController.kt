@@ -40,6 +40,6 @@ class AuthController(
             VerifyAuthCodeCommand(request.email, request.code)
         )
 
-        return VerifyAuthCodeResponse(true, result.authToken)
+        return VerifyAuthCodeResponse(true, result.accessToken)
     }
 }

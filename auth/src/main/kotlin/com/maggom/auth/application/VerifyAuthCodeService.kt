@@ -4,14 +4,13 @@ import com.maggom.auth.port.`in`.VerifyAuthCodeCommand
 import com.maggom.auth.port.`in`.VerifyAuthCodeResult
 import com.maggom.auth.port.`in`.VerifyAuthCodeUseCase
 import com.maggom.auth.port.out.AuthCodeStoragePort
-import com.maggom.auth.port.out.AuthTokenStoragePort
+import com.maggom.auth.port.out.TokenPort
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class VerifyAuthCodeService(
     private val authCodeStoragePort: AuthCodeStoragePort,
-    private val authTokenStoragePort: AuthTokenStoragePort,
+    private val tokenPort: TokenPort,
 ) : VerifyAuthCodeUseCase {
 
     override fun verifyAuthCode(command: VerifyAuthCodeCommand): VerifyAuthCodeResult {
@@ -24,9 +23,8 @@ class VerifyAuthCodeService(
 
         authCodeStoragePort.delete(command.email)
 
-        val token = UUID.randomUUID().toString()
-        authTokenStoragePort.save(token, command.email)
+        val token = tokenPort.generateToken(command.email)
 
-        return VerifyAuthCodeResult(token)
+        return VerifyAuthCodeResult(accessToken = token)
     }
 }

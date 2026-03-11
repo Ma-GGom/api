@@ -10,5 +10,5 @@ data class VerifyAuthCodeCommand(
 )
 
 data class VerifyAuthCodeResult(
-    val authToken: String,
+    val accessToken: String,
 )

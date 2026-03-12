@@ -27,7 +27,7 @@ class AuthController(
     @ResponseStatus(HttpStatus.OK)
     fun sendAuthCode(@Valid @RequestBody request: SendAuthCodeRequest): SendAuthCodeResponse {
         val result = sendAuthCodeUseCase.sendAuthCode(
-            SendAuthCodeCommand(request.email)
+            SendAuthCodeCommand(request.email, request.flow)
         )
 
         return SendAuthCodeResponse(true, "발송 완료", result.expiresInSeconds)

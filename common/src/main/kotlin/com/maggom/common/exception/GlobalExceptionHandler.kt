@@ -38,6 +38,22 @@ class GlobalExceptionHandler {
         return ErrorResponse(ex.message ?: "너무 많은 요청입니다.")
     }
 
+    @ExceptionHandler(MemberNotFoundException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun handleMemberNotFoundException(ex: MemberNotFoundException): ErrorResponse {
+        log.debug("Member not found: {}", ex.message)
+
+        return ErrorResponse(ex.message ?: "존재하지 않는 회원입니다.")
+    }
+
+    @ExceptionHandler(MemberAlreadyExistsException::class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    fun handleMemberAlreadyExistsException(ex: MemberAlreadyExistsException): ErrorResponse {
+        log.debug("Member already exists: {}", ex.message)
+
+        return ErrorResponse(ex.message ?: "이미 가입된 회원입니다.")
+    }
+
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleException(ex: Exception): ErrorResponse {

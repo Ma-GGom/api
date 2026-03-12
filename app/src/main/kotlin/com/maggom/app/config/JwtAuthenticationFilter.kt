@@ -18,7 +18,7 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        if (isPublicPath(request.requestURI)) {
+        if (request.method == "OPTIONS" || isPublicPath(request.requestURI)) {
             filterChain.doFilter(request, response)
             return
         }
@@ -65,6 +65,7 @@ class JwtAuthenticationFilter(
     companion object {
         private val PUBLIC_PATHS = listOf(
             "/api/v1/auth/",
+            "/api/v1/subscriptions/count",
         )
     }
 }

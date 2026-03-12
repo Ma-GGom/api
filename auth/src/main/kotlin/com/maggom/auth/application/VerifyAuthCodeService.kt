@@ -1,9 +1,11 @@
 package com.maggom.auth.application
 
+import com.maggom.auth.port.`in`.AuthFlow
 import com.maggom.auth.port.`in`.VerifyAuthCodeCommand
 import com.maggom.auth.port.`in`.VerifyAuthCodeResult
 import com.maggom.auth.port.`in`.VerifyAuthCodeUseCase
 import com.maggom.auth.port.out.AuthCodeStoragePort
+import com.maggom.auth.port.out.MemberRegistrationPort
 import com.maggom.auth.port.out.TokenPort
 import org.springframework.stereotype.Service
 
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service
 class VerifyAuthCodeService(
     private val authCodeStoragePort: AuthCodeStoragePort,
     private val tokenPort: TokenPort,
+    private val memberRegistrationPort: MemberRegistrationPort,
 ) : VerifyAuthCodeUseCase {
 
     override fun verifyAuthCode(command: VerifyAuthCodeCommand): VerifyAuthCodeResult {
@@ -22,6 +25,10 @@ class VerifyAuthCodeService(
         }
 
         authCodeStoragePort.delete(command.email)
+
+        if (entry.flow == AuthFlow.SUBSCRIBE) {
+            memberRegistrationPort.register(command.email)
+        }
 
         val token = tokenPort.generateToken(command.email)
 

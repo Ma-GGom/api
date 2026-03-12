@@ -36,7 +36,7 @@ class AuthCodeService(
 
         authCodeStoragePort.save(
             command.email,
-            AuthCodeEntry(authCode, now.plusMinutes(expiryMinutes), now)
+            AuthCodeEntry(authCode, now.plusMinutes(expiryMinutes), now, command.flow)
         )
 
         try {

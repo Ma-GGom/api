@@ -30,7 +30,7 @@ class AuthController(
             SendAuthCodeCommand(request.email, request.flow)
         )
 
-        return SendAuthCodeResponse(true, "발송 완료", result.expiresInSeconds)
+        return SendAuthCodeResponse("발송 완료", result.expiresInSeconds)
     }
 
     @PostMapping("/email/verify")
@@ -40,6 +40,6 @@ class AuthController(
             VerifyAuthCodeCommand(request.email, request.code)
         )
 
-        return VerifyAuthCodeResponse(true, result.accessToken)
+        return VerifyAuthCodeResponse(result.accessToken)
     }
 }

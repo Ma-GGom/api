@@ -1,13 +1,15 @@
 package com.maggom.member.application
 
 import com.maggom.member.port.`in`.MemberQueryUseCase
+import com.maggom.member.port.out.MemberPort
 import org.springframework.stereotype.Service
 
 @Service
-class MemberQueryService : MemberQueryUseCase {
+class MemberQueryService(
+    private val memberPort: MemberPort,
+) : MemberQueryUseCase {
 
     override fun existsByEmail(email: String): Boolean {
-        // TODO: JPA 구현체로 교체
-        return false
+        return memberPort.existsByEmail(email)
     }
 }

@@ -17,14 +17,11 @@ class GmailSenderAdapter(
         val mailMessage = SimpleMailMessage().apply {
             setFrom(fromEmail)
             setTo(message.to)
-            subject = "[마곰] 이메일 인증 코드"
+            subject = "[마꼼] 이메일 인증 번호"
             text = """
-                안녕하세요, 마곰입니다.
+                ${message.code}
 
-                인증 코드: ${message.code}
-
-                위 코드를 입력하여 인증을 완료해주세요.
-                인증 코드는 ${message.expiryMinutes}분간 유효합니다.
+                위 인증 번호를 입력하여 인증을 완료해 주세요.
             """.trimIndent()
         }
 

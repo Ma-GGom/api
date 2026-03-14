@@ -1,8 +1,10 @@
 package com.maggom.app.notification
 
+import com.maggom.app.scheduler.NotificationScheduler
 import com.maggom.event.domain.MarathonEvent
 import com.maggom.event.domain.MarathonEventStatus
 import com.maggom.event.port.out.MarathonEventPort
+import com.maggom.event.port.out.NotificationMailPort
 import com.maggom.member.domain.Member
 import com.maggom.member.port.`in`.SubscriptionQueryUseCase
 import com.maggom.member.port.`in`.SubscriptionResult
@@ -12,6 +14,7 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -51,7 +54,9 @@ class NotificationSchedulerTest {
     }
 
     @Test
-    fun `receiveDays가 ALL이고 시간 일치하면 메일 발송`() {
+    @DisplayName("receiveDays가 ALL이고 시간 일치하면 메일 발송")
+    fun all_receive_days_with_matching_time_sends_mail() {
+        // given
         every { memberPort.findAll() } returns listOf(member())
         every { subscriptionQueryUseCase.getByEmail(any()) } returns pref(
             receiveDays = "ALL",
@@ -60,13 +65,17 @@ class NotificationSchedulerTest {
         every { marathonEventPort.findActiveByRegions(any()) } returns listOf(event(distances = listOf("10K")))
         justRun { notificationMailPort.sendNotification(any(), any()) }
 
+        // when
         scheduler.sendNotifications()
 
+        // then
         verify(exactly = 1) { notificationMailPort.sendNotification(any(), any()) }
     }
 
     @Test
-    fun `오늘 요일이 수신 요일에 포함되면 메일 발송`() {
+    @DisplayName("오늘 요일이 수신 요일에 포함되면 메일 발송")
+    fun today_in_receive_days_sends_mail() {
+        // given
         every { memberPort.findAll() } returns listOf(member())
         every { subscriptionQueryUseCase.getByEmail(any()) } returns pref(
             receiveDays = todayCode,
@@ -75,39 +84,51 @@ class NotificationSchedulerTest {
         every { marathonEventPort.findActiveByRegions(any()) } returns listOf(event(distances = listOf("10K")))
         justRun { notificationMailPort.sendNotification(any(), any()) }
 
+        // when
         scheduler.sendNotifications()
 
+        // then
         verify(exactly = 1) { notificationMailPort.sendNotification(any(), any()) }
     }
 
     @Test
-    fun `오늘 요일이 수신 요일에 없으면 메일 미발송`() {
+    @DisplayName("오늘 요일이 수신 요일에 없으면 메일 미발송")
+    fun today_not_in_receive_days_does_not_send_mail() {
+        // given
         every { memberPort.findAll() } returns listOf(member())
         every { subscriptionQueryUseCase.getByEmail(any()) } returns pref(
             receiveDays = notTodayCode,
             receiveTime = LocalTime.of(currentHour, 0),
         )
 
+        // when
         scheduler.sendNotifications()
 
+        // then
         verify(exactly = 0) { notificationMailPort.sendNotification(any(), any()) }
     }
 
     @Test
-    fun `수신 시간이 현재 시간과 다르면 메일 미발송`() {
+    @DisplayName("수신 시간이 현재 시간과 다르면 메일 미발송")
+    fun different_receive_time_does_not_send_mail() {
+        // given
         every { memberPort.findAll() } returns listOf(member())
         every { subscriptionQueryUseCase.getByEmail(any()) } returns pref(
             receiveDays = "ALL",
             receiveTime = LocalTime.of(differentHour, 0),
         )
 
+        // when
         scheduler.sendNotifications()
 
+        // then
         verify(exactly = 0) { notificationMailPort.sendNotification(any(), any()) }
     }
 
     @Test
-    fun `매칭되는 이벤트가 없으면 메일 미발송`() {
+    @DisplayName("매칭되는 이벤트가 없으면 메일 미발송")
+    fun no_matching_events_does_not_send_mail() {
+        // given
         every { memberPort.findAll() } returns listOf(member())
         every { subscriptionQueryUseCase.getByEmail(any()) } returns pref(
             receiveDays = "ALL",
@@ -115,13 +136,17 @@ class NotificationSchedulerTest {
         )
         every { marathonEventPort.findActiveByRegions(any()) } returns emptyList()
 
+        // when
         scheduler.sendNotifications()
 
+        // then
         verify(exactly = 0) { notificationMailPort.sendNotification(any(), any()) }
     }
 
     @Test
-    fun `구독 distances에 맞는 이벤트가 없으면 메일 미발송`() {
+    @DisplayName("구독 distances에 맞는 이벤트가 없으면 메일 미발송")
+    fun no_events_matching_subscribed_distances_does_not_send_mail() {
+        // given
         every { memberPort.findAll() } returns listOf(member())
         every { subscriptionQueryUseCase.getByEmail(any()) } returns pref(
             receiveDays = "ALL",
@@ -132,13 +157,17 @@ class NotificationSchedulerTest {
             event(distances = listOf("FULL")),
         )
 
+        // when
         scheduler.sendNotifications()
 
+        // then
         verify(exactly = 0) { notificationMailPort.sendNotification(any(), any()) }
     }
 
     @Test
-    fun `구독 distances에 하나라도 일치하면 해당 이벤트 포함하여 발송`() {
+    @DisplayName("구독 distances에 하나라도 일치하면 해당 이벤트 포함하여 발송")
+    fun at_least_one_matching_distance_includes_event_and_sends_mail() {
+        // given
         every { memberPort.findAll() } returns listOf(member())
         every { subscriptionQueryUseCase.getByEmail(any()) } returns pref(
             receiveDays = "ALL",
@@ -150,13 +179,17 @@ class NotificationSchedulerTest {
         )
         justRun { notificationMailPort.sendNotification(any(), any()) }
 
+        // when
         scheduler.sendNotifications()
 
+        // then
         verify(exactly = 1) { notificationMailPort.sendNotification(any(), any()) }
     }
 
     @Test
-    fun `한 회원 발송 실패해도 다음 회원 계속 처리`() {
+    @DisplayName("한 회원 발송 실패해도 다음 회원 계속 처리")
+    fun one_member_send_failure_continues_processing_next_member() {
+        // given
         val member1 = member(email = "fail@test.com")
         val member2 = member(email = "ok@test.com")
 
@@ -169,8 +202,10 @@ class NotificationSchedulerTest {
         every { notificationMailPort.sendNotification("fail@test.com", any()) } throws RuntimeException("발송 실패")
         justRun { notificationMailPort.sendNotification("ok@test.com", any()) }
 
+        // when
         scheduler.sendNotifications()
 
+        // then
         verify(exactly = 1) { notificationMailPort.sendNotification("ok@test.com", any()) }
     }
 

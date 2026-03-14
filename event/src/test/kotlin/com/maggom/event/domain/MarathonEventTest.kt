@@ -1,5 +1,6 @@
 package com.maggom.event.domain
 
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -12,14 +13,18 @@ class MarathonEventTest {
     private val now = LocalDateTime.now()
 
     @Test
-    fun `유효한 값으로 생성 성공`() {
+    @DisplayName("유효한 값으로 생성 성공")
+    fun valid_values_create_marathon_event_successfully() {
+        // when & then
         assertDoesNotThrow {
             event()
         }
     }
 
     @Test
-    fun `title이 빈 문자열이면 예외`() {
+    @DisplayName("title이 빈 문자열이면 예외")
+    fun empty_title_throws_exception() {
+        // when & then
         val ex = assertThrows<IllegalArgumentException> {
             event(title = "")
         }
@@ -28,7 +33,9 @@ class MarathonEventTest {
     }
 
     @Test
-    fun `region이 빈 문자열이면 예외`() {
+    @DisplayName("region이 빈 문자열이면 예외")
+    fun empty_region_throws_exception() {
+        // when & then
         val ex = assertThrows<IllegalArgumentException> {
             event(region = "")
         }
@@ -37,7 +44,9 @@ class MarathonEventTest {
     }
 
     @Test
-    fun `distances가 비어있으면 예외`() {
+    @DisplayName("distances가 비어있으면 예외")
+    fun empty_distances_throws_exception() {
+        // when & then
         val ex = assertThrows<IllegalArgumentException> {
             event(distances = emptyList())
         }
@@ -46,21 +55,27 @@ class MarathonEventTest {
     }
 
     @Test
-    fun `linkUrl이 http로 시작하면 성공`() {
+    @DisplayName("linkUrl이 http로 시작하면 성공")
+    fun link_url_starting_with_http_creates_successfully() {
+        // when & then
         assertDoesNotThrow {
             event(linkUrl = "http://example.com")
         }
     }
 
     @Test
-    fun `linkUrl이 https로 시작하면 성공`() {
+    @DisplayName("linkUrl이 https로 시작하면 성공")
+    fun link_url_starting_with_https_creates_successfully() {
+        // when & then
         assertDoesNotThrow {
             event(linkUrl = "https://example.com")
         }
     }
 
     @Test
-    fun `linkUrl이 http나 https로 시작하지 않으면 예외`() {
+    @DisplayName("linkUrl이 http나 https로 시작하지 않으면 예외")
+    fun link_url_not_starting_with_http_or_https_throws_exception() {
+        // when & then
         val ex = assertThrows<IllegalArgumentException> {
             event(linkUrl = "ftp://example.com")
         }
@@ -69,7 +84,9 @@ class MarathonEventTest {
     }
 
     @Test
-    fun `regEndDate가 regStartDate보다 이전이면 예외`() {
+    @DisplayName("regEndDate가 regStartDate보다 이전이면 예외")
+    fun reg_end_date_before_reg_start_date_throws_exception() {
+        // when & then
         val ex = assertThrows<IllegalArgumentException> {
             event(
                 regStartDate = now.plusDays(5),
@@ -81,7 +98,9 @@ class MarathonEventTest {
     }
 
     @Test
-    fun `regEndDate가 regStartDate와 같으면 성공`() {
+    @DisplayName("regEndDate가 regStartDate와 같으면 성공")
+    fun reg_end_date_equal_to_reg_start_date_creates_successfully() {
+        // when & then
         assertDoesNotThrow {
             event(
                 regStartDate = now,
@@ -91,7 +110,9 @@ class MarathonEventTest {
     }
 
     @Test
-    fun `regEndDate가 null이면 성공`() {
+    @DisplayName("regEndDate가 null이면 성공")
+    fun null_reg_end_date_creates_successfully() {
+        // when & then
         assertDoesNotThrow {
             event(regEndDate = null)
         }

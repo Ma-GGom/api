@@ -1,4 +1,4 @@
-package com.maggom.app.notification
+package com.maggom.event.port.out
 
 import com.maggom.event.domain.MarathonEvent
 

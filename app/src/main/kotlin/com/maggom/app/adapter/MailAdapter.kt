@@ -3,7 +3,7 @@ package com.maggom.app.adapter
 import com.maggom.auth.port.out.AuthCodeEmailMessage
 import com.maggom.auth.port.out.EmailSenderPort
 import com.maggom.auth.port.out.WelcomeMailPort
-import com.maggom.app.notification.NotificationMailPort
+import com.maggom.event.port.out.NotificationMailPort
 import com.maggom.event.domain.MarathonEvent
 import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage

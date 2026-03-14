@@ -1,7 +1,8 @@
-package com.maggom.app.notification
+package com.maggom.app.scheduler
 
 import com.maggom.event.domain.MarathonEvent
 import com.maggom.event.port.out.MarathonEventPort
+import com.maggom.event.port.out.NotificationMailPort
 import com.maggom.member.port.`in`.SubscriptionQueryUseCase
 import com.maggom.member.port.out.MemberPort
 import org.slf4j.LoggerFactory

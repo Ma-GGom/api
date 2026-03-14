@@ -20,12 +20,13 @@ class JwtTokenAdapter(
         Keys.hmacShaKeyFor(secret.toByteArray(Charsets.UTF_8))
     }
 
-    override fun generateToken(email: String): String {
+    override fun generateToken(email: String, role: String): String {
         val now = Date()
         val expiry = Date(now.time + expiryHours * 3600 * 1000)
 
         return Jwts.builder()
             .subject(email)
+            .claim("role", role)
             .issuedAt(now)
             .expiration(expiry)
             .signWith(key)
@@ -40,6 +41,20 @@ class JwtTokenAdapter(
                 .parseSignedClaims(token)
                 .payload
                 .subject
+        } catch (e: ExpiredJwtException) {
+            throw TokenExpiredException()
+        } catch (e: JwtException) {
+            null
+        }
+    }
+
+    override fun extractRole(token: String): String? {
+        return try {
+            Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .payload["role"] as? String
         } catch (e: ExpiredJwtException) {
             throw TokenExpiredException()
         } catch (e: JwtException) {

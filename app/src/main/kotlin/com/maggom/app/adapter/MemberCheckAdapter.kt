@@ -12,4 +12,8 @@ class MemberCheckAdapter(
     override fun existsByEmail(email: String): Boolean {
         return memberQueryUseCase.existsByEmail(email)
     }
+
+    override fun findRoleByEmail(email: String): String {
+        return memberQueryUseCase.findRoleByEmail(email)
+    }
 }

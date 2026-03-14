@@ -41,12 +41,24 @@ class JwtAuthenticationFilter(
             return
         }
 
+        val role = tokenPort.extractRole(token) ?: "USER"
+
+        if (isAdminPath(request.requestURI) && role != "ADMIN") {
+            writeForbidden(response, "관리자 권한이 필요합니다.")
+            return
+        }
+
         request.setAttribute("authenticatedEmail", email)
+        request.setAttribute("authenticatedRole", role)
         filterChain.doFilter(request, response)
     }
 
     private fun isPublicPath(uri: String): Boolean {
         return PUBLIC_PATHS.any { uri.startsWith(it) }
+    }
+
+    private fun isAdminPath(uri: String): Boolean {
+        return uri.startsWith("/api/v1/admin/")
     }
 
     private fun extractToken(request: HttpServletRequest): String? {
@@ -58,6 +70,12 @@ class JwtAuthenticationFilter(
 
     private fun writeUnauthorized(response: HttpServletResponse, message: String) {
         response.status = HttpServletResponse.SC_UNAUTHORIZED
+        response.contentType = "application/json;charset=UTF-8"
+        response.writer.write("""{"message": "$message"}""")
+    }
+
+    private fun writeForbidden(response: HttpServletResponse, message: String) {
+        response.status = HttpServletResponse.SC_FORBIDDEN
         response.contentType = "application/json;charset=UTF-8"
         response.writer.write("""{"message": "$message"}""")
     }

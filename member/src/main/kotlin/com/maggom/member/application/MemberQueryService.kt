@@ -12,4 +12,8 @@ class MemberQueryService(
     override fun existsByEmail(email: String): Boolean {
         return memberPort.existsByEmail(email)
     }
+
+    override fun findRoleByEmail(email: String): String {
+        return memberPort.findByEmail(email)?.role?.name ?: "USER"
+    }
 }

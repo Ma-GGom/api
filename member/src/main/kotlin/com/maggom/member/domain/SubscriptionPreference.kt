@@ -16,11 +16,19 @@ data class SubscriptionPreference(
         require(receiveDays.split(",").all { it.trim() in VALID_DAYS }) {
             "유효하지 않은 수신 요일입니다. 허용값: ${VALID_DAYS.joinToString()}"
         }
+        require(receiveTime in VALID_TIMES) {
+            "유효하지 않은 수신 시간입니다. 허용값: ${VALID_TIMES.joinToString()}"
+        }
         require(prefRegions.isNotEmpty()) { "선호 지역은 하나 이상 선택해야 합니다." }
         require(prefDistances.isNotEmpty()) { "선호 코스는 하나 이상 선택해야 합니다." }
     }
 
     companion object {
         val VALID_DAYS = setOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN", "ALL")
+        val VALID_TIMES = setOf(
+            LocalTime.of(8, 0),
+            LocalTime.of(12, 0),
+            LocalTime.of(18, 0),
+        )
     }
 }

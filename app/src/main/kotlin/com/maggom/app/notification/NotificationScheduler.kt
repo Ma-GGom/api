@@ -19,7 +19,7 @@ class NotificationScheduler(
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 0 8,12,18 * * *")
     fun sendNotifications() {
         val now = LocalTime.now()
         val todayCode = toDayCode(java.time.LocalDate.now().dayOfWeek)

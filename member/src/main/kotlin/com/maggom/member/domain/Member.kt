@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 data class Member(
     val id: Long = 0,
     val email: String,
-    val role: MemberRole = MemberRole.USER,
+    val role: MemberRole = MemberRole.MEMBER,
     val isVerified: Boolean = true,
     val createdAt: LocalDateTime = LocalDateTime.now(),
 ) {

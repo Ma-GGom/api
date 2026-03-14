@@ -14,6 +14,6 @@ class MemberQueryService(
     }
 
     override fun findRoleByEmail(email: String): String {
-        return memberPort.findByEmail(email)?.role?.name ?: "USER"
+        return memberPort.findByEmail(email)?.role?.name ?: "MEMBER"
     }
 }

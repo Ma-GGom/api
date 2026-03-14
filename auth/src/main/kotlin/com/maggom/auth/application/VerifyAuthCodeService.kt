@@ -33,7 +33,7 @@ class VerifyAuthCodeService(
         val role = if (entry.flow == AuthFlow.SUBSCRIBE) {
             memberRegistrationPort.register(command.email)
             welcomeMailPort.sendWelcomeMail(command.email)
-            "USER"
+            "MEMBER"
         } else {
             memberCheckPort.findRoleByEmail(command.email)
         }

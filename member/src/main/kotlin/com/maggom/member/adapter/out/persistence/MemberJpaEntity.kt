@@ -24,7 +24,7 @@ class MemberJpaEntity(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val role: MemberRole = MemberRole.USER,
+    val role: MemberRole = MemberRole.MEMBER,
 
     @Column(nullable = false)
     val isVerified: Boolean = true,

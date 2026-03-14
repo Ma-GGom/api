@@ -94,7 +94,7 @@ class VerifyAuthCodeServiceTest {
         // given
         every { authCodeStoragePort.findByEmail(any()) } returns authCodeEntry("123456", AuthFlow.SETTINGS)
         justRun { authCodeStoragePort.delete(any()) }
-        every { memberCheckPort.findRoleByEmail(any()) } returns "USER"
+        every { memberCheckPort.findRoleByEmail(any()) } returns "MEMBER"
         every { tokenPort.generateToken(any(), any()) } returns "jwt.token.value"
 
         // when
@@ -112,7 +112,7 @@ class VerifyAuthCodeServiceTest {
         // given
         every { authCodeStoragePort.findByEmail(any()) } returns authCodeEntry("123456", AuthFlow.SETTINGS)
         justRun { authCodeStoragePort.delete(any()) }
-        every { memberCheckPort.findRoleByEmail(any()) } returns "USER"
+        every { memberCheckPort.findRoleByEmail(any()) } returns "MEMBER"
         every { tokenPort.generateToken(any(), any()) } returns "token"
 
         // when

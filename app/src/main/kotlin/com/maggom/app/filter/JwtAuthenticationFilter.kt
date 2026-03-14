@@ -41,7 +41,7 @@ class JwtAuthenticationFilter(
             return
         }
 
-        val role = tokenPort.extractRole(token) ?: "USER"
+        val role = tokenPort.extractRole(token) ?: "MEMBER"
 
         if (isAdminPath(request.requestURI) && role != "ADMIN") {
             writeForbidden(response, "관리자 권한이 필요합니다.")

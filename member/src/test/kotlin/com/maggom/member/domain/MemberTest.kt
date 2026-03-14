@@ -64,7 +64,7 @@ class MemberTest {
         val member = Member(email = "user@example.com")
 
         // then
-        assertEquals(MemberRole.USER, member.role)
+        assertEquals(MemberRole.MEMBER, member.role)
     }
 
     @Test

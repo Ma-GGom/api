@@ -1,4 +1,4 @@
-package com.maggom.app.config
+package com.maggom.app.filter
 
 import com.maggom.auth.port.out.TokenPort
 import com.maggom.common.exception.TokenExpiredException

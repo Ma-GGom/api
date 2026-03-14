@@ -1,4 +1,4 @@
-package com.maggom.app.config
+package com.maggom.app.filter
 
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest

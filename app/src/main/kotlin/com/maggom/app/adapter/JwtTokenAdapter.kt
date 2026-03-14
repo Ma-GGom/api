@@ -1,4 +1,4 @@
-package com.maggom.auth.adapter.out.jwt
+package com.maggom.app.adapter
 
 import com.maggom.auth.port.out.TokenPort
 import com.maggom.common.exception.TokenExpiredException

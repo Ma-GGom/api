@@ -28,4 +28,8 @@ class MemberPersistenceAdapter(
     override fun deleteById(id: Long) {
         memberJpaRepository.deleteById(id)
     }
+
+    override fun findAll(): List<Member> {
+        return memberJpaRepository.findAll().map { it.toDomain() }
+    }
 }

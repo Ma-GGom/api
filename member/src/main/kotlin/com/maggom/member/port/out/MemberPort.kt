@@ -8,4 +8,5 @@ interface MemberPort {
     fun existsByEmail(email: String): Boolean
     fun countAll(): Long
     fun deleteById(id: Long)
+    fun findAll(): List<Member>
 }

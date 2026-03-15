@@ -52,8 +52,9 @@ class NotificationScheduler(
     }
 
     private fun findMatchingEvents(prefRegions: List<String>, prefDistances: List<String>): List<MarathonEvent> {
-        return marathonEventPort.findActiveByRegions(prefRegions)
+        return marathonEventPort.findOpenByRegions(prefRegions)
             .filter { event -> event.distances.any { it in prefDistances } }
+            .take(MAX_EVENTS_PER_MAIL)
     }
 
     private fun shouldSendToday(receiveDays: String, todayCode: String): Boolean {
@@ -78,5 +79,6 @@ class NotificationScheduler(
 
     companion object {
         private const val SEND_INTERVAL_MS = 200L
+        private const val MAX_EVENTS_PER_MAIL = 10
     }
 }

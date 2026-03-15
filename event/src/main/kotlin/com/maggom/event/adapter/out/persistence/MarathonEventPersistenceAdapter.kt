@@ -9,9 +9,9 @@ class MarathonEventPersistenceAdapter(
     private val marathonEventQueryRepository: MarathonEventQueryRepository,
 ) : MarathonEventPort {
 
-    override fun findActiveByRegions(regions: List<String>): List<MarathonEvent> {
+    override fun findOpenByRegions(regions: List<String>): List<MarathonEvent> {
         return marathonEventQueryRepository
-            .findActiveByRegions(regions)
+            .findOpenByRegions(regions)
             .map { it.toDomain() }
     }
 }

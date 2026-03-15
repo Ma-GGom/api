@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter
 @Component
 class MailAdapter(
     private val mailSender: JavaMailSender,
-    @Value("\${spring.mail.username}") private val fromEmail: String,
+    @Value("\${spring.mail.from-email}") private val fromEmail: String,
     @Value("\${spring.mail.from-name}") private val fromName: String,
 ) : EmailSenderPort, WelcomeMailPort, NotificationMailPort {
 

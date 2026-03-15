@@ -62,7 +62,7 @@ class NotificationSchedulerTest {
             receiveDays = "ALL",
             receiveTime = LocalTime.of(currentHour, 0),
         )
-        every { marathonEventPort.findActiveByRegions(any()) } returns listOf(event(distances = listOf("10K")))
+        every { marathonEventPort.findOpenByRegions(any()) } returns listOf(event(distances = listOf("10K")))
         justRun { notificationMailPort.sendNotification(any(), any()) }
 
         // when
@@ -81,7 +81,7 @@ class NotificationSchedulerTest {
             receiveDays = todayCode,
             receiveTime = LocalTime.of(currentHour, 0),
         )
-        every { marathonEventPort.findActiveByRegions(any()) } returns listOf(event(distances = listOf("10K")))
+        every { marathonEventPort.findOpenByRegions(any()) } returns listOf(event(distances = listOf("10K")))
         justRun { notificationMailPort.sendNotification(any(), any()) }
 
         // when
@@ -134,7 +134,7 @@ class NotificationSchedulerTest {
             receiveDays = "ALL",
             receiveTime = LocalTime.of(currentHour, 0),
         )
-        every { marathonEventPort.findActiveByRegions(any()) } returns emptyList()
+        every { marathonEventPort.findOpenByRegions(any()) } returns emptyList()
 
         // when
         scheduler.sendNotifications()
@@ -153,7 +153,7 @@ class NotificationSchedulerTest {
             receiveTime = LocalTime.of(currentHour, 0),
             prefDistances = listOf("10K"),
         )
-        every { marathonEventPort.findActiveByRegions(any()) } returns listOf(
+        every { marathonEventPort.findOpenByRegions(any()) } returns listOf(
             event(distances = listOf("FULL")),
         )
 
@@ -174,7 +174,7 @@ class NotificationSchedulerTest {
             receiveTime = LocalTime.of(currentHour, 0),
             prefDistances = listOf("10K", "HALF"),
         )
-        every { marathonEventPort.findActiveByRegions(any()) } returns listOf(
+        every { marathonEventPort.findOpenByRegions(any()) } returns listOf(
             event(distances = listOf("HALF", "FULL")),
         )
         justRun { notificationMailPort.sendNotification(any(), any()) }
@@ -198,7 +198,7 @@ class NotificationSchedulerTest {
             receiveDays = "ALL",
             receiveTime = LocalTime.of(currentHour, 0),
         )
-        every { marathonEventPort.findActiveByRegions(any()) } returns listOf(event(distances = listOf("10K")))
+        every { marathonEventPort.findOpenByRegions(any()) } returns listOf(event(distances = listOf("10K")))
         every { notificationMailPort.sendNotification("fail@test.com", any()) } throws RuntimeException("발송 실패")
         justRun { notificationMailPort.sendNotification("ok@test.com", any()) }
 

@@ -60,7 +60,7 @@ class MarathonEventQueryRepositoryTest {
         save(status = MarathonEventStatus.OPEN, region = "수도권", regEndDate = now.plusDays(7))
 
         // when
-        val results = repository.findActiveByRegions(listOf("수도권"))
+        val results = repository.findOpenByRegions(listOf("수도권"))
 
         // then
         assertEquals(1, results.size)
@@ -73,7 +73,7 @@ class MarathonEventQueryRepositoryTest {
         save(status = MarathonEventStatus.UPCOMING, region = "수도권", regEndDate = now.plusDays(7))
 
         // when
-        val results = repository.findActiveByRegions(listOf("수도권"))
+        val results = repository.findOpenByRegions(listOf("수도권"))
 
         // then
         assertEquals(1, results.size)
@@ -86,7 +86,7 @@ class MarathonEventQueryRepositoryTest {
         save(status = MarathonEventStatus.CLOSED, region = "수도권", regEndDate = now.plusDays(7))
 
         // when
-        val results = repository.findActiveByRegions(listOf("수도권"))
+        val results = repository.findOpenByRegions(listOf("수도권"))
 
         // then
         assertTrue(results.isEmpty())
@@ -99,7 +99,7 @@ class MarathonEventQueryRepositoryTest {
         save(status = MarathonEventStatus.OPEN, region = "충청권", regEndDate = now.plusDays(7))
 
         // when
-        val results = repository.findActiveByRegions(listOf("수도권"))
+        val results = repository.findOpenByRegions(listOf("수도권"))
 
         // then
         assertTrue(results.isEmpty())
@@ -112,7 +112,7 @@ class MarathonEventQueryRepositoryTest {
         save(status = MarathonEventStatus.OPEN, region = "수도권", regEndDate = now.minusDays(1))
 
         // when
-        val results = repository.findActiveByRegions(listOf("수도권"))
+        val results = repository.findOpenByRegions(listOf("수도권"))
 
         // then
         assertTrue(results.isEmpty())
@@ -125,7 +125,7 @@ class MarathonEventQueryRepositoryTest {
         save(status = MarathonEventStatus.OPEN, region = "수도권", regEndDate = null)
 
         // when
-        val results = repository.findActiveByRegions(listOf("수도권"))
+        val results = repository.findOpenByRegions(listOf("수도권"))
 
         // then
         assertEquals(1, results.size)
@@ -138,27 +138,43 @@ class MarathonEventQueryRepositoryTest {
         save(status = MarathonEventStatus.OPEN, region = "충청권", regEndDate = now.plusDays(7))
 
         // when
-        val results = repository.findActiveByRegions(listOf("수도권", "충청권"))
+        val results = repository.findOpenByRegions(listOf("수도권", "충청권"))
 
         // then
         assertEquals(1, results.size)
     }
 
     @Test
-    @DisplayName("regStartDate 오름차순 정렬")
-    fun results_sorted_by_reg_start_date_ascending() {
+    @DisplayName("OPEN 이벤트는 regEndDate 오름차순 정렬")
+    fun open_events_sorted_by_reg_end_date_ascending() {
         // given
-        save(status = MarathonEventStatus.OPEN, region = "수도권", regStartDate = now.plusDays(5), regEndDate = now.plusDays(10))
-        save(status = MarathonEventStatus.OPEN, region = "수도권", regStartDate = now.plusDays(1), regEndDate = now.plusDays(10))
-        save(status = MarathonEventStatus.OPEN, region = "수도권", regStartDate = now.plusDays(3), regEndDate = now.plusDays(10))
+        save(status = MarathonEventStatus.OPEN, region = "수도권", regEndDate = now.plusDays(10))
+        save(status = MarathonEventStatus.OPEN, region = "수도권", regEndDate = now.plusDays(3))
+        save(status = MarathonEventStatus.OPEN, region = "수도권", regEndDate = now.plusDays(7))
 
         // when
-        val results = repository.findActiveByRegions(listOf("수도권"))
+        val results = repository.findOpenByRegions(listOf("수도권"))
 
         // then
         assertEquals(3, results.size)
-        assertTrue(results[0].regStartDate.isBefore(results[1].regStartDate))
-        assertTrue(results[1].regStartDate.isBefore(results[2].regStartDate))
+        assertTrue(results[0].regEndDate!!.isBefore(results[1].regEndDate!!))
+        assertTrue(results[1].regEndDate!!.isBefore(results[2].regEndDate!!))
+    }
+
+    @Test
+    @DisplayName("OPEN이 UPCOMING보다 먼저 정렬")
+    fun open_events_sorted_before_upcoming_events() {
+        // given
+        save(status = MarathonEventStatus.UPCOMING, region = "수도권", regEndDate = now.plusDays(10))
+        save(status = MarathonEventStatus.OPEN, region = "수도권", regEndDate = now.plusDays(5))
+
+        // when
+        val results = repository.findOpenByRegions(listOf("수도권"))
+
+        // then
+        assertEquals(2, results.size)
+        assertEquals(MarathonEventStatus.OPEN, results[0].status)
+        assertEquals(MarathonEventStatus.UPCOMING, results[1].status)
     }
 
     private fun save(

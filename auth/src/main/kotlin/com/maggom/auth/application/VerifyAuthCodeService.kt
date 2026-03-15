@@ -1,17 +1,23 @@
 package com.maggom.auth.application
 
+import com.maggom.auth.port.`in`.AuthFlow
 import com.maggom.auth.port.`in`.VerifyAuthCodeCommand
 import com.maggom.auth.port.`in`.VerifyAuthCodeResult
 import com.maggom.auth.port.`in`.VerifyAuthCodeUseCase
 import com.maggom.auth.port.out.AuthCodeStoragePort
-import com.maggom.auth.port.out.AuthTokenStoragePort
+import com.maggom.auth.port.out.MemberCheckPort
+import com.maggom.auth.port.out.MemberRegistrationPort
+import com.maggom.auth.port.out.TokenPort
+import com.maggom.auth.port.out.WelcomeMailPort
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class VerifyAuthCodeService(
     private val authCodeStoragePort: AuthCodeStoragePort,
-    private val authTokenStoragePort: AuthTokenStoragePort,
+    private val tokenPort: TokenPort,
+    private val memberCheckPort: MemberCheckPort,
+    private val memberRegistrationPort: MemberRegistrationPort,
+    private val welcomeMailPort: WelcomeMailPort,
 ) : VerifyAuthCodeUseCase {
 
     override fun verifyAuthCode(command: VerifyAuthCodeCommand): VerifyAuthCodeResult {
@@ -24,9 +30,16 @@ class VerifyAuthCodeService(
 
         authCodeStoragePort.delete(command.email)
 
-        val token = UUID.randomUUID().toString()
-        authTokenStoragePort.save(token, command.email)
+        val role = if (entry.flow == AuthFlow.SUBSCRIBE) {
+            memberRegistrationPort.register(command.email)
+            welcomeMailPort.sendWelcomeMail(command.email)
+            "MEMBER"
+        } else {
+            memberCheckPort.findRoleByEmail(command.email)
+        }
 
-        return VerifyAuthCodeResult(token)
+        val token = tokenPort.generateToken(command.email, role)
+
+        return VerifyAuthCodeResult(accessToken = token)
     }
 }

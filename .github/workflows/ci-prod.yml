@@ -31,4 +31,6 @@ jobs:
           restore-keys: gradle-
 
       - name: Build & Test
-        run: ./gradlew :app:build
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:build

@@ -34,7 +34,9 @@ jobs:
           restore-keys: gradle-
 
       - name: Build JAR
-        run: ./gradlew :app:bootJar
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:bootJar
 
       - name: Login to ghcr.io
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.7.0

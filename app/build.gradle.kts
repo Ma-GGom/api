@@ -2,6 +2,10 @@ plugins {
     id("org.springframework.boot")
 }
 
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    workingDir = file(projectDir)
+}
+
 dependencies {
     implementation(project(":common"))
     implementation(project(":auth"))

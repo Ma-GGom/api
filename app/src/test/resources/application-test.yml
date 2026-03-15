@@ -1,0 +1,19 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+  mail:
+    from-name: 마꼼
+    username: test@test.com
+    password: test-password
+
+  task:
+    scheduling:
+      enabled: false
+
+maggom:
+  cors:
+    allowed-origins:
+      - http://localhost:3000

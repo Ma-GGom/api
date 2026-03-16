@@ -5,6 +5,7 @@ import com.maggom.auth.port.out.EmailSenderPort
 import com.maggom.auth.port.out.TestMailPort
 import com.maggom.auth.port.out.WelcomeMailPort
 import com.maggom.event.domain.MarathonEvent
+import com.maggom.event.port.out.MarathonEventPort
 import com.maggom.event.port.out.NotificationMailPort
 import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage
@@ -28,7 +29,13 @@ class MailAdapter(
     @Value("\${spring.mail.from-name}") private val fromName: String,
     @Value("\${maggom.mail.fallback.from-email:#{null}}") private val fallbackFromEmail: String?,
     @Autowired(required = false) @Qualifier("gmailMailSender") private val fallbackMailSender: JavaMailSender?,
+    private val marathonEventPort: MarathonEventPort,
 ) : EmailSenderPort, WelcomeMailPort, NotificationMailPort, TestMailPort {
+
+    companion object {
+        private val DEFAULT_REGIONS = listOf("수도권")
+        private const val WELCOME_EVENTS_COUNT = 2
+    }
 
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -46,11 +53,15 @@ class MailAdapter(
     }
 
     override fun sendWelcomeMail(to: String) {
+        val events = marathonEventPort.findOpenByRegions(DEFAULT_REGIONS).take(WELCOME_EVENTS_COUNT)
+        val context = Context(Locale.KOREAN).apply {
+            setVariable("events", events)
+        }
         sendHtml(
             to = to,
             subject = "[마꼼] 구독을 시작했어요! 🏃",
             template = "mail/welcome",
-            context = Context(Locale.KOREAN),
+            context = context,
         )
     }
 

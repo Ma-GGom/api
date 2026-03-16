@@ -97,6 +97,8 @@ jobs:
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             SES_SMTP_USERNAME=${{ secrets.SES_SMTP_USERNAME }}
             SES_SMTP_PASSWORD=${{ secrets.SES_SMTP_PASSWORD }}
+            GMAIL_USERNAME=${{ secrets.GMAIL_USERNAME }}
+            GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }}
             EOF
 
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin

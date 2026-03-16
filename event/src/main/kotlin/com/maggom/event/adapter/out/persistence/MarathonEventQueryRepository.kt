@@ -1,6 +1,8 @@
 package com.maggom.event.adapter.out.persistence
 
 import com.maggom.event.domain.MarathonEventStatus
+import com.maggom.event.domain.RegionGroup
+import com.querydsl.core.BooleanBuilder
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.stereotype.Repository
@@ -24,11 +26,16 @@ class MarathonEventQueryRepository(
             .`when`(event.status.eq(MarathonEventStatus.OPEN)).then(event.regEndDate)
             .otherwise(event.regStartDate)
 
+        val prefixes = regions.flatMap { RegionGroup.toPrefixes(it) }
+        val regionPredicate = prefixes.fold(BooleanBuilder()) { builder, prefix ->
+            builder.or(event.region.startsWith(prefix))
+        }
+
         return queryFactory
             .selectFrom(event)
             .where(
                 event.status.`in`(MarathonEventStatus.OPEN, MarathonEventStatus.UPCOMING),
-                event.region.`in`(regions),
+                regionPredicate,
                 event.regEndDate.isNull.or(event.regEndDate.gt(now)),
             )
             .orderBy(

@@ -59,7 +59,7 @@ class MailAdapter(
         }
         sendHtml(
             to = to,
-            subject = "[마꼼] 구독을 시작했어요! 🏃",
+            subject = "[마꼼] 구독을 시작했어요! 🎉",
             template = "mail/welcome",
             context = context,
         )
@@ -71,7 +71,7 @@ class MailAdapter(
         }
         sendHtml(
             to = to,
-            subject = "[마꼼] 이번 주 마라톤 대회 알림",
+            subject = "[마꼼] 마라톤 대회 목록 🏃",
             template = "mail/notification",
             context = context,
         )

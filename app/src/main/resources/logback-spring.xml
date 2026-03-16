@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
   <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- %-40.40logger{40} : %m%n%wEx"/>
 
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -8,6 +10,10 @@
       <pattern>${LOG_PATTERN}</pattern>
     </encoder>
   </appender>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+  </root>
 
   <springProfile name="prod">
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -27,12 +33,6 @@
     <logger name="org.springframework" level="WARN"/>
     <logger name="org.hibernate" level="WARN"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
-  </springProfile>
-
-  <springProfile name="!prod">
-    <root level="INFO">
-      <appender-ref ref="CONSOLE"/>
-    </root>
   </springProfile>
 
 </configuration>

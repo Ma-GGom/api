@@ -19,14 +19,19 @@ services:
     container_name: maggom-app
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      TZ: Asia/Seoul
       DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       SES_SMTP_USERNAME: ${SES_SMTP_USERNAME}
       SES_SMTP_PASSWORD: ${SES_SMTP_PASSWORD}
+      GMAIL_USERNAME: ${GMAIL_USERNAME}
+      GMAIL_PASSWORD: ${GMAIL_PASSWORD}
     ports:
       - "8080:8080"
+    volumes:
+      - ../logs/spring:/logs
     depends_on:
       - postgres
     restart: always

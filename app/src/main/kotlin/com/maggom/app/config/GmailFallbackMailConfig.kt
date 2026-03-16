@@ -10,6 +10,8 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 @Configuration
 @Profile("prod")
 class GmailFallbackMailConfig(
+    @Value("\${maggom.mail.fallback.host}") private val host: String,
+    @Value("\${maggom.mail.fallback.port}") private val port: Int,
     @Value("\${maggom.mail.fallback.username}") private val username: String,
     @Value("\${maggom.mail.fallback.password}") private val password: String,
 ) {
@@ -17,8 +19,8 @@ class GmailFallbackMailConfig(
     @Bean("gmailMailSender")
     fun gmailMailSender(): JavaMailSender {
         return JavaMailSenderImpl().apply {
-            host = "smtp.gmail.com"
-            port = 587
+            host = this@GmailFallbackMailConfig.host
+            port = this@GmailFallbackMailConfig.port
             this.username = username
             this.password = password
             javaMailProperties.apply {

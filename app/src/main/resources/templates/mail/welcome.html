@@ -29,31 +29,31 @@
                 이런 형식으로 알림을 받아보실 수 있어요.
               </p>
 
-              <!-- 샘플 카드 -->
-              <div style="border:1px solid #e0e7ff; border-radius:6px; padding:12px 16px; margin-bottom:8px;">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td style="color:#312e81; font-size:14px; font-weight:700;">2026 서울 봄 마라톤</td>
-                    <td align="right" style="white-space:nowrap;">
-                      <span style="display:inline-block; padding:4px 12px; background:#ccc; color:#ffffff; font-size:12px; font-weight:600; border-radius:4px;">대회 사이트</span>
-                    </td>
-                  </tr>
-                </table>
-                <p style="margin:5px 0 0; color:#666; font-size:12px;"><strong>대회일:</strong> 2026.04.19 <span style="color:#c7d2fe; margin:0 6px;">|</span> <strong>지역:</strong> 서울시 어쩌구 <span style="color:#c7d2fe; margin:0 6px;">|</span> <strong>코스:</strong> 10K, 하프, 풀</p>
-                <p style="margin:3px 0 0; color:#999; font-size:12px;"><strong style="color:#888;">신청기간:</strong> 2026.03.01 ~ 2026.04.01</p>
-              </div>
-
-              <div style="border:1px solid #e0e7ff; border-radius:6px; padding:12px 16px; margin-bottom:20px;">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td style="color:#312e81; font-size:14px; font-weight:700;">2026 한강 하프마라톤</td>
-                    <td align="right" style="white-space:nowrap;">
-                      <span style="display:inline-block; padding:4px 12px; background:#ccc; color:#ffffff; font-size:12px; font-weight:600; border-radius:4px;">대회 사이트</span>
-                    </td>
-                  </tr>
-                </table>
-                <p style="margin:5px 0 0; color:#666; font-size:12px;"><strong>대회일:</strong> 2026.05.10 <span style="color:#c7d2fe; margin:0 6px;">|</span> <strong>지역:</strong> 서울시 어쩌구 <span style="color:#c7d2fe; margin:0 6px;">|</span> <strong>코스:</strong> 하프</p>
-                <p style="margin:3px 0 0; color:#999; font-size:12px;"><strong style="color:#888;">신청기간:</strong> 2026.03.15 ~ 2026.04.20</p>
+              <!-- 이벤트 목록 -->
+              <div th:each="event : ${events}">
+                <div style="border:1px solid #e0e7ff; border-radius:6px; padding:12px 16px; margin-bottom:8px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="color:#312e81; font-size:14px; font-weight:700;" th:text="${event.title}">대회명</td>
+                      <td align="right" style="white-space:nowrap;">
+                        <a th:href="${event.linkUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding:4px 12px; background:#6366f1; color:#ffffff; font-size:12px; font-weight:600; text-decoration:none; border-radius:4px;">대회 사이트</a>
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="margin:5px 0 0; color:#666; font-size:12px;">
+                    <strong>대회일:</strong> <span th:text="${#temporals.format(event.eventDate, 'yyyy.MM.dd')}">2026.04.20</span>
+                    <span style="color:#c7d2fe; margin:0 6px;">|</span>
+                    <strong>지역:</strong> <span th:text="${event.region}">수도권</span>
+                    <span style="color:#c7d2fe; margin:0 6px;">|</span>
+                    <strong>코스:</strong> <span th:text="${#strings.listJoin(event.distances, ', ')}">10K, 하프</span>
+                  </p>
+                  <p style="margin:3px 0 0; color:#999; font-size:12px;">
+                    <strong style="color:#888;">신청기간:</strong>
+                    <span th:text="${#temporals.format(event.regStartDate, 'yyyy.MM.dd')}">2026.03.01</span>
+                    ~
+                    <span th:text="${event.regEndDate != null ? #temporals.format(event.regEndDate, 'yyyy.MM.dd') : '미정'}">2026.04.01</span>
+                  </p>
+                </div>
               </div>
 
               <p style="margin:0; color:#666; font-size:13px; line-height:1.6;">

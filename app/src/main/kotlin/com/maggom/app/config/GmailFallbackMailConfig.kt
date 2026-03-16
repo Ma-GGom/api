@@ -21,8 +21,8 @@ class GmailFallbackMailConfig(
         return JavaMailSenderImpl().apply {
             host = this@GmailFallbackMailConfig.host
             port = this@GmailFallbackMailConfig.port
-            this.username = username
-            this.password = password
+            this.username = this@GmailFallbackMailConfig.username
+            this.password = this@GmailFallbackMailConfig.password
             javaMailProperties.apply {
                 put("mail.smtp.auth", "true")
                 put("mail.smtp.starttls.enable", "true")

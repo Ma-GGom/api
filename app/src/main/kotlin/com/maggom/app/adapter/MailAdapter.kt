@@ -1,5 +1,6 @@
 package com.maggom.app.adapter
 
+import com.maggom.app.config.FallbackMailProperties
 import com.maggom.auth.port.out.AuthCodeEmailMessage
 import com.maggom.auth.port.out.EmailSenderPort
 import com.maggom.auth.port.out.TestMailPort
@@ -27,7 +28,7 @@ class MailAdapter(
     private val templateEngine: TemplateEngine,
     @Value("\${spring.mail.from-email}") private val fromEmail: String,
     @Value("\${spring.mail.from-name}") private val fromName: String,
-    @Value("\${maggom.mail.fallback.from-email:#{null}}") private val fallbackFromEmail: String?,
+    @Autowired(required = false) private val fallbackMailProps: FallbackMailProperties?,
     @Autowired(required = false) @Qualifier("gmailMailSender") private val fallbackMailSender: JavaMailSender?,
     private val marathonEventPort: MarathonEventPort,
 ) : EmailSenderPort, WelcomeMailPort, NotificationMailPort, TestMailPort {
@@ -94,9 +95,9 @@ class MailAdapter(
         try {
             doSend(mailSender, fromEmail, to, subject, html)
         } catch (e: MailException) {
-            if (fallbackMailSender != null && fallbackFromEmail != null) {
+            if (fallbackMailSender != null && fallbackMailProps != null) {
                 log.warn("주 발송 실패, Gmail 폴백 시도 [to={}, subject={}]: {}", to, subject, e.message)
-                doSend(fallbackMailSender, fallbackFromEmail, to, subject, html)
+                doSend(fallbackMailSender, fallbackMailProps.fromEmail, to, subject, html)
             } else {
                 throw e
             }

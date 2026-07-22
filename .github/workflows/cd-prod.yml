@@ -65,7 +65,7 @@ jobs:
 
       - name: Get GitHub Actions IP
         id: ip
-        uses: haythem/public-ip@bdddd92c198b0955f0b494a8ebeac529754262ff # v1.3
+        run: echo "ipv4=$(curl -s https://checkip.amazonaws.com)" >> "$GITHUB_OUTPUT"
 
       - name: Add IP to Security Group
         env:

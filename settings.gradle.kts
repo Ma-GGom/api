@@ -1,4 +1,4 @@
-rootProject.name = "maggom"
+rootProject.name = "maggom-api"
 
 include("app")
 include("admin")

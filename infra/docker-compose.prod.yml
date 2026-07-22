@@ -3,7 +3,7 @@ name: maggom-api
 services:
   app:
     image: ghcr.io/ma-ggom/api:latest
-    container_name: maggom-app
+    container_name: maggom-api
     environment:
       SPRING_PROFILES_ACTIVE: prod
       TZ: Asia/Seoul
@@ -18,5 +18,5 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ../logs/spring:/logs
+      - ./logs:/logs
     restart: always

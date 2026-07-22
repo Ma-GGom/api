@@ -19,5 +19,5 @@ services:
       - "8080:8080"
     volumes:
       - ./logs:/logs
-    mem_limit: 480m
+    mem_limit: 360m
     restart: always

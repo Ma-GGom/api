@@ -1,8 +1,8 @@
-name: CI (develop)
+name: CI
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, main ]
 
 jobs:
   ci:

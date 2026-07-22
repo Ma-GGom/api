@@ -1,8 +1,8 @@
-name: CD (main)
+name: CD Prod
 
 on:
   workflow_run:
-    workflows: [ "CI (main)" ]
+    workflows: [ "CI" ]
     types: [ completed ]
     branches: [ main ]
 
@@ -54,7 +54,7 @@ jobs:
           context: .
           file: infra/Dockerfile.prod
           push: true
-          tags: ghcr.io/ma-ggom/backend:latest
+          tags: ghcr.io/ma-ggom/api:latest
 
       - name: Get GitHub Actions IP
         id: ip
@@ -77,8 +77,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: infra/docker-compose.prod.yml,infra/sql/schema.sql
-          target: ~/maggom
+          source: infra/docker-compose.prod.yml
+          target: ~/maggom-api
           strip_components: 1
 
       - name: Deploy to EC2
@@ -88,10 +88,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            mkdir -p ~/maggom
+            mkdir -p ~/maggom-api
 
-            cat > ~/maggom/.env << 'EOF'
-            DB_NAME=${{ secrets.DB_NAME }}
+            cat > ~/maggom-api/.env << 'EOF'
+            DB_URL=${{ secrets.DB_URL }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
@@ -102,21 +102,10 @@ jobs:
             EOF
 
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ghcr.io/ma-ggom/backend:latest
+            docker pull ghcr.io/ma-ggom/api:latest
 
-            cd ~/maggom
+            cd ~/maggom-api
             docker compose -f docker-compose.prod.yml --env-file .env down
-            docker compose -f docker-compose.prod.yml --env-file .env up -d postgres
-            sleep 5
-
-            # 테이블 없으면 schema.sql 실행 (최초 배포 시 1회)
-            source .env
-            TABLE_EXISTS=$(docker exec maggom-postgres psql -U $DB_USERNAME -d $DB_NAME -tAc "SELECT 1 FROM information_schema.tables WHERE table_name='marathon_event'" 2>/dev/null)
-            if [ "$TABLE_EXISTS" != "1" ]; then
-              docker cp sql/schema.sql maggom-postgres:/schema.sql
-              docker exec maggom-postgres psql -U $DB_USERNAME -d $DB_NAME -f /schema.sql
-            fi
-
             docker compose -f docker-compose.prod.yml --env-file .env up -d
 
       - name: Remove IP from Security Group

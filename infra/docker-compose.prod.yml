@@ -1,26 +1,13 @@
-name: maggom-server
+name: maggom-api
 
 services:
-  postgres:
-    image: postgres:17
-    container_name: maggom-postgres
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - maggom-postgres-data:/var/lib/postgresql/data
-    restart: always
-
   app:
-    image: ghcr.io/ma-ggom/backend:latest
+    image: ghcr.io/ma-ggom/api:latest
     container_name: maggom-app
     environment:
       SPRING_PROFILES_ACTIVE: prod
       TZ: Asia/Seoul
-      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
@@ -32,9 +19,4 @@ services:
       - "8080:8080"
     volumes:
       - ../logs/spring:/logs
-    depends_on:
-      - postgres
     restart: always
-
-volumes:
-  maggom-postgres-data:

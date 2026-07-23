@@ -2,4 +2,4 @@ FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 COPY app/build/libs/app.jar app.jar
 COPY app/config/ config/
-ENTRYPOINT ["java", "-Xmx192m", "-XX:MaxMetaspaceSize=100m", "-XX:ReservedCodeCacheSize=48m", "-Xss512k", "-XX:+UseSerialGC", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx192m", "-XX:MaxMetaspaceSize=192m", "-XX:ReservedCodeCacheSize=48m", "-Xss512k", "-XX:+UseSerialGC", "-jar", "app.jar"]

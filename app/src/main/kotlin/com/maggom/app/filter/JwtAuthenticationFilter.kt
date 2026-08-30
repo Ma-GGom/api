@@ -84,6 +84,7 @@ class JwtAuthenticationFilter(
         private val PUBLIC_PATHS = listOf(
             "/api/v1/auth/",
             "/api/v1/subscriptions/count",
+            "/api/v1/subscriptions/unsubscribe",
         )
     }
 }

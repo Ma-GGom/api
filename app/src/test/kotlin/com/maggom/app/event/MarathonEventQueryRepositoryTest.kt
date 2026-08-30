@@ -2,6 +2,7 @@ package com.maggom.app.event
 
 import com.maggom.event.adapter.out.persistence.MarathonEventJpaEntity
 import com.maggom.event.adapter.out.persistence.MarathonEventQueryRepository
+import com.maggom.event.domain.EventScale
 import com.maggom.event.domain.MarathonEventStatus
 import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.DisplayName
@@ -162,10 +163,15 @@ class MarathonEventQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("OPEN이 UPCOMING보다 먼저 정렬")
-    fun open_events_sorted_before_upcoming_events() {
+    @DisplayName("접수 시작이 먼 UPCOMING은 OPEN보다 뒤로 정렬")
+    fun distant_upcoming_events_sorted_after_open_events() {
         // given
-        save(status = MarathonEventStatus.UPCOMING, region = "서울특별시 송파구", regEndDate = now.plusDays(10))
+        save(
+            status = MarathonEventStatus.UPCOMING,
+            region = "서울특별시 송파구",
+            regStartDate = now.plusDays(30),
+            regEndDate = now.plusDays(60),
+        )
         save(status = MarathonEventStatus.OPEN, region = "서울특별시 마포구", regEndDate = now.plusDays(5))
 
         // when
@@ -177,11 +183,141 @@ class MarathonEventQueryRepositoryTest {
         assertEquals(MarathonEventStatus.UPCOMING, results[1].status)
     }
 
+    @Test
+    @DisplayName("includeSmall=false - SMALL 규모 대회 제외")
+    fun exclude_small_scale_when_include_small_is_false() {
+        // given
+        save(
+            status = MarathonEventStatus.OPEN,
+            region = "서울특별시 마포구",
+            regEndDate = now.plusDays(7),
+            eventScale = EventScale.SMALL,
+        )
+
+        // when
+        val results = repository.findOpenByRegions(listOf("수도권"), includeSmall = false)
+
+        // then
+        assertTrue(results.isEmpty())
+    }
+
+    @Test
+    @DisplayName("includeSmall=false - MAJOR와 UNKNOWN 규모 대회는 포함")
+    fun include_major_and_unknown_scale_when_include_small_is_false() {
+        // given
+        save(
+            status = MarathonEventStatus.OPEN,
+            region = "서울특별시 마포구",
+            regEndDate = now.plusDays(7),
+            eventScale = EventScale.MAJOR,
+        )
+        save(
+            status = MarathonEventStatus.OPEN,
+            region = "경기도 성남시",
+            regEndDate = now.plusDays(7),
+            eventScale = EventScale.UNKNOWN,
+        )
+
+        // when
+        val results = repository.findOpenByRegions(listOf("수도권"), includeSmall = false)
+
+        // then
+        assertEquals(2, results.size)
+        assertTrue(results.none { it.eventScale == EventScale.SMALL })
+    }
+
+    @Test
+    @DisplayName("includeSmall=true - 모든 규모 대회 포함")
+    fun include_all_scales_when_include_small_is_true() {
+        // given
+        save(
+            status = MarathonEventStatus.OPEN,
+            region = "서울특별시 마포구",
+            regEndDate = now.plusDays(7),
+            eventScale = EventScale.SMALL,
+        )
+        save(
+            status = MarathonEventStatus.OPEN,
+            region = "경기도 성남시",
+            regEndDate = now.plusDays(7),
+            eventScale = EventScale.MAJOR,
+        )
+
+        // when
+        val results = repository.findOpenByRegions(listOf("수도권"), includeSmall = true)
+
+        // then
+        assertEquals(2, results.size)
+    }
+
+    @Test
+    @DisplayName("접수 임박(7일 내 오픈) UPCOMING이 접수중보다 먼저 정렬")
+    fun imminent_upcoming_events_sorted_first() {
+        // given
+        save(status = MarathonEventStatus.OPEN, region = "서울특별시 마포구", regEndDate = now.plusDays(30))
+        save(
+            status = MarathonEventStatus.UPCOMING,
+            region = "서울특별시 송파구",
+            regStartDate = now.plusDays(3),
+            regEndDate = now.plusDays(40),
+        )
+
+        // when
+        val results = repository.findOpenByRegions(listOf("수도권"))
+
+        // then
+        assertEquals(2, results.size)
+        assertEquals(MarathonEventStatus.UPCOMING, results[0].status)
+        assertEquals(MarathonEventStatus.OPEN, results[1].status)
+    }
+
+    @Test
+    @DisplayName("마감 임박 대회가 일반 접수중 대회보다 먼저 정렬")
+    fun closing_soon_events_sorted_before_other_open_events() {
+        // given
+        save(status = MarathonEventStatus.OPEN, region = "서울특별시 마포구", regEndDate = now.plusDays(30))
+        save(status = MarathonEventStatus.OPEN, region = "경기도 성남시", regEndDate = now.plusDays(2))
+
+        // when
+        val results = repository.findOpenByRegions(listOf("수도권"))
+
+        // then
+        assertEquals(2, results.size)
+        assertEquals("경기도 성남시", results[0].region)
+    }
+
+    @Test
+    @DisplayName("일반 접수중 대회는 최근 수집된 순으로 정렬")
+    fun other_open_events_sorted_by_newest_crawled_first() {
+        // given
+        save(
+            status = MarathonEventStatus.OPEN,
+            region = "서울특별시 마포구",
+            regEndDate = now.plusDays(30),
+            createdAt = now.minusDays(10),
+        )
+        save(
+            status = MarathonEventStatus.OPEN,
+            region = "경기도 성남시",
+            regEndDate = now.plusDays(60),
+            createdAt = now.minusDays(1),
+        )
+
+        // when
+        val results = repository.findOpenByRegions(listOf("수도권"))
+
+        // then
+        assertEquals(2, results.size)
+        assertEquals("경기도 성남시", results[0].region)
+    }
+
     private fun save(
         status: MarathonEventStatus,
         region: String,
         regStartDate: LocalDateTime = now.minusDays(1),
         regEndDate: LocalDateTime?,
+        eventScale: EventScale = EventScale.UNKNOWN,
+        createdAt: LocalDateTime = now,
     ) {
         val entity = MarathonEventJpaEntity(
             title = "테스트 마라톤",
@@ -192,6 +328,8 @@ class MarathonEventQueryRepositoryTest {
             regEndDate = regEndDate,
             linkUrl = "https://example.com",
             status = status,
+            eventScale = eventScale,
+            createdAt = createdAt,
             sourceName = "test",
             sourceUrl = "https://source.com",
             crawledAtKst = now,

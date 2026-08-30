@@ -1,5 +1,6 @@
 package com.maggom.event.adapter.out.persistence
 
+import com.maggom.event.domain.EventScale
 import com.maggom.event.domain.MarathonEvent
 import com.maggom.event.domain.MarathonEventStatus
 import jakarta.persistence.Column
@@ -46,6 +47,10 @@ class MarathonEventJpaEntity(
     @Column(nullable = false)
     val status: MarathonEventStatus,
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    val eventScale: EventScale = EventScale.UNKNOWN,
+
     @Column(nullable = false)
     val sourceName: String,
 
@@ -54,6 +59,9 @@ class MarathonEventJpaEntity(
 
     @Column(nullable = false)
     val crawledAtKst: LocalDateTime,
+
+    @Column(nullable = false, updatable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 ) {
     fun toDomain(): MarathonEvent = MarathonEvent(
         id = id,
@@ -65,6 +73,7 @@ class MarathonEventJpaEntity(
         regEndDate = regEndDate,
         linkUrl = linkUrl,
         status = status,
+        eventScale = eventScale,
         sourceName = sourceName,
         sourceUrl = sourceUrl,
         crawledAtKst = crawledAtKst,

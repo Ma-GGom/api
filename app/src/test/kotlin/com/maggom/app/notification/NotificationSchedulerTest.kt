@@ -209,6 +209,38 @@ class NotificationSchedulerTest {
         verify(exactly = 1) { notificationMailPort.sendNotification("ok@test.com", any()) }
     }
 
+    @Test
+    @DisplayName("includeSmall=false면 조회 시 includeSmall=false로 전달")
+    fun include_small_false_is_passed_to_event_port() {
+        // given
+        every { memberPort.findAll() } returns listOf(member())
+        every { subscriptionQueryUseCase.getByEmail(any()) } returns pref(includeSmall = false)
+        every { marathonEventPort.findOpenByRegions(any(), any()) } returns listOf(event(distances = listOf("10K")))
+        justRun { notificationMailPort.sendNotification(any(), any()) }
+
+        // when
+        scheduler.sendNotifications()
+
+        // then
+        verify(exactly = 1) { marathonEventPort.findOpenByRegions(listOf("수도권"), false) }
+    }
+
+    @Test
+    @DisplayName("includeSmall=true면 조회 시 includeSmall=true로 전달")
+    fun include_small_true_is_passed_to_event_port() {
+        // given
+        every { memberPort.findAll() } returns listOf(member())
+        every { subscriptionQueryUseCase.getByEmail(any()) } returns pref(includeSmall = true)
+        every { marathonEventPort.findOpenByRegions(any(), any()) } returns listOf(event(distances = listOf("10K")))
+        justRun { notificationMailPort.sendNotification(any(), any()) }
+
+        // when
+        scheduler.sendNotifications()
+
+        // then
+        verify(exactly = 1) { marathonEventPort.findOpenByRegions(listOf("수도권"), true) }
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private fun member(email: String = "user@test.com") = Member(
@@ -221,12 +253,13 @@ class NotificationSchedulerTest {
         receiveTime: LocalTime = LocalTime.of(currentHour, 0),
         prefRegions: List<String> = listOf("수도권"),
         prefDistances: List<String> = listOf("10K", "HALF"),
+        includeSmall: Boolean = true,
     ) = SubscriptionResult(
         receiveDays = receiveDays,
         receiveTime = receiveTime,
         prefRegions = prefRegions,
         prefDistances = prefDistances,
-        includeSmall = true,
+        includeSmall = includeSmall,
     )
 
     private fun event(distances: List<String>) = MarathonEvent(

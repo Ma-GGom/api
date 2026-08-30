@@ -13,6 +13,7 @@ data class MarathonEvent(
     val regEndDate: LocalDateTime?,
     val linkUrl: String,
     val status: MarathonEventStatus,
+    val eventScale: EventScale = EventScale.UNKNOWN,
     val sourceName: String,
     val sourceUrl: String,
     val crawledAtKst: LocalDateTime,

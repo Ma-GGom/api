@@ -36,7 +36,7 @@ class NotificationScheduler(
                 if (!shouldSendToday(pref.receiveDays, todayCode)) continue
                 if (!isReceiveHour(pref.receiveTime, now)) continue
 
-                val events = findMatchingEvents(pref.prefRegions, pref.prefDistances)
+                val events = findMatchingEvents(pref.prefRegions, pref.prefDistances, pref.includeSmall)
                 if (events.isEmpty()) continue
 
                 notificationMailPort.sendNotification(member.email, events)
@@ -51,8 +51,12 @@ class NotificationScheduler(
         log.info("알림 발송 완료 - 발송 수: $sentCount")
     }
 
-    private fun findMatchingEvents(prefRegions: List<String>, prefDistances: List<String>): List<MarathonEvent> {
-        return marathonEventPort.findOpenByRegions(prefRegions)
+    private fun findMatchingEvents(
+        prefRegions: List<String>,
+        prefDistances: List<String>,
+        includeSmall: Boolean,
+    ): List<MarathonEvent> {
+        return marathonEventPort.findOpenByRegions(prefRegions, includeSmall)
             .filter { event -> event.distances.any { it in prefDistances } }
             .take(MAX_EVENTS_PER_MAIL)
     }
@@ -79,6 +83,6 @@ class NotificationScheduler(
 
     companion object {
         private const val SEND_INTERVAL_MS = 200L
-        private const val MAX_EVENTS_PER_MAIL = 10
+        private const val MAX_EVENTS_PER_MAIL = 15
     }
 }

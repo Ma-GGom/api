@@ -311,6 +311,24 @@ class MarathonEventQueryRepositoryTest {
         assertEquals("경기도 성남시", results[0].region)
     }
 
+    @Test
+    @DisplayName("접수 종료일이 시작일보다 빠른 잘못된 데이터는 제외")
+    fun events_with_inverted_registration_period_are_excluded() {
+        // given
+        save(
+            status = MarathonEventStatus.OPEN,
+            region = "서울특별시 마포구",
+            regStartDate = now.plusDays(10),
+            regEndDate = now.plusDays(5),
+        )
+
+        // when
+        val results = repository.findOpenByRegions(listOf("수도권"))
+
+        // then
+        assertTrue(results.isEmpty())
+    }
+
     private fun save(
         status: MarathonEventStatus,
         region: String,

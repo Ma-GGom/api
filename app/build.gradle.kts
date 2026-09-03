@@ -2,8 +2,16 @@ plugins {
     id("org.springframework.boot")
 }
 
+// 설정은 maggom-config 서브모듈에 있으므로 실행/테스트 모두 그 경로를 바라보게 한다.
+val configLocation = "file:${rootProject.projectDir}/maggom-config/config/"
+
 tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
     workingDir = file(projectDir)
+    systemProperty("spring.config.additional-location", configLocation)
+}
+
+tasks.withType<Test> {
+    systemProperty("spring.config.additional-location", configLocation)
 }
 
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

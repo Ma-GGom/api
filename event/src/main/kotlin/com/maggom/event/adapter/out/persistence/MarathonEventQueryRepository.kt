@@ -31,6 +31,8 @@ class MarathonEventQueryRepository(
                 event.status.`in`(MarathonEventStatus.OPEN, MarathonEventStatus.UPCOMING),
                 regionPredicate,
                 event.regEndDate.isNull.or(event.regEndDate.gt(now)),
+                // 수집 오류로 접수 기간이 뒤집힌 행은 도메인 불변식을 깨므로 조회 단계에서 제외한다.
+                event.regEndDate.isNull.or(event.regEndDate.goe(event.regStartDate)),
                 scalePredicate(includeSmall),
             )
             .orderBy(

@@ -7,6 +7,7 @@ import com.maggom.auth.port.out.TestMailPort
 import com.maggom.auth.port.out.WelcomeMailPort
 import com.maggom.event.domain.MarathonEvent
 import com.maggom.event.port.out.MarathonEventPort
+import com.maggom.app.mail.MarathonEventView
 import com.maggom.event.port.out.NotificationMailPort
 import com.maggom.member.port.out.UnsubscribeTokenPort
 import jakarta.mail.internet.InternetAddress
@@ -21,6 +22,7 @@ import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Component
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
+import java.time.LocalDateTime
 import java.util.Locale
 
 @Component
@@ -78,7 +80,7 @@ class MailAdapter(
         val events = marathonEventPort.findOpenByRegions(DEFAULT_REGIONS).take(WELCOME_EVENTS_COUNT)
         val unsubscribeUrl = unsubscribeUrl(to)
         val context = Context(Locale.KOREAN).apply {
-            setVariable("events", events)
+            setVariable("events", toViews(events))
             setVariable("unsubscribeUrl", unsubscribeUrl)
         }
         sendHtml(
@@ -95,7 +97,7 @@ class MailAdapter(
     override fun sendNotification(to: String, events: List<MarathonEvent>) {
         val unsubscribeUrl = unsubscribeUrl(to)
         val context = Context(Locale.KOREAN).apply {
-            setVariable("events", events)
+            setVariable("events", toViews(events))
             setVariable("unsubscribeUrl", unsubscribeUrl)
         }
         sendHtml(
@@ -121,6 +123,12 @@ class MailAdapter(
                 context = context,
             )
         )
+    }
+
+    private fun toViews(events: List<MarathonEvent>): List<MarathonEventView> {
+        val now = LocalDateTime.now()
+
+        return events.map { MarathonEventView.from(it, now) }
     }
 
     private fun unsubscribeUrl(to: String): String {

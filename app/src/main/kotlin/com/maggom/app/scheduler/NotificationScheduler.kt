@@ -1,6 +1,7 @@
 package com.maggom.app.scheduler
 
 import com.maggom.event.domain.MarathonEvent
+import com.maggom.event.domain.NoticeOrder
 import com.maggom.event.port.out.MarathonEventPort
 import com.maggom.event.port.out.NotificationMailPort
 import com.maggom.member.port.`in`.SubscriptionQueryUseCase
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.DayOfWeek
+import java.time.LocalDateTime
 import java.time.LocalTime
 
 @Component
@@ -56,9 +58,11 @@ class NotificationScheduler(
         prefDistances: List<String>,
         includeSmall: Boolean,
     ): List<MarathonEvent> {
-        return marathonEventPort.findOpenByRegions(prefRegions, includeSmall)
+        val matched = marathonEventPort.findOpenByRegions(prefRegions, includeSmall)
             .filter { event -> event.distances.any { it in prefDistances } }
-            .take(MAX_EVENTS_PER_MAIL)
+
+        // 우선 단계 대회 수에 따라 20~30개로 개수가 달라진다.
+        return NoticeOrder.pick(matched, LocalDateTime.now())
     }
 
     private fun shouldSendToday(receiveDays: String, todayCode: String): Boolean {
@@ -83,6 +87,5 @@ class NotificationScheduler(
 
     companion object {
         private const val SEND_INTERVAL_MS = 200L
-        private const val MAX_EVENTS_PER_MAIL = 15
     }
 }

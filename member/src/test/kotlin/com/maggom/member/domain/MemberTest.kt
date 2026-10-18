@@ -68,6 +68,38 @@ class MemberTest {
     }
 
     @Test
+    @DisplayName("이름은 선택값이고 기본은 없음")
+    fun name_is_optional() {
+        // when
+        val member = Member(email = "user@example.com")
+
+        // then
+        assertEquals(null, member.name)
+    }
+
+    @Test
+    @DisplayName("이름이 20자를 넘으면 예외")
+    fun too_long_name_throws_exception() {
+        // when & then
+        val ex = assertThrows<IllegalArgumentException> {
+            Member(email = "user@example.com", name = "가".repeat(21))
+        }
+
+        assertEquals("이름은 20자 이하로 입력해 주세요.", ex.message)
+    }
+
+    @Test
+    @DisplayName("rename - 앞뒤 공백을 지우고, 빈 값이면 이름 삭제")
+    fun rename_trims_and_clears_blank() {
+        // given
+        val member = Member(email = "user@example.com", name = "김마꼼")
+
+        // when & then
+        assertEquals("박러너", member.rename("  박러너 ").name)
+        assertEquals(null, member.rename("   ").name)
+    }
+
+    @Test
     @DisplayName("기본 isVerified는 true")
     fun default_is_verified_is_true() {
         // when

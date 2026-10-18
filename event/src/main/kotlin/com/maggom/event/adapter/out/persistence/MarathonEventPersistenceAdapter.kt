@@ -1,9 +1,11 @@
 package com.maggom.event.adapter.out.persistence
 
 import com.maggom.event.domain.MarathonEvent
+import com.maggom.event.domain.NoticeOrder
 import com.maggom.event.port.out.MarathonEventPort
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 class MarathonEventPersistenceAdapter(
@@ -13,9 +15,11 @@ class MarathonEventPersistenceAdapter(
     private val log = LoggerFactory.getLogger(this::class.java)
 
     override fun findOpenByRegions(regions: List<String>, includeSmall: Boolean): List<MarathonEvent> {
-        return marathonEventQueryRepository
+        val events = marathonEventQueryRepository
             .findOpenByRegions(regions, includeSmall)
             .mapNotNull { toDomainOrNull(it) }
+
+        return NoticeOrder.sort(events, LocalDateTime.now())
     }
 
     /** 수집 데이터가 도메인 불변식을 어겨도 해당 대회만 건너뛰고 알림 발송은 계속한다. */

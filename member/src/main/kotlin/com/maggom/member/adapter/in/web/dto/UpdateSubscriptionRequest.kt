@@ -8,4 +8,6 @@ data class UpdateSubscriptionRequest(
     val prefRegions: List<String>?,
     val prefDistances: List<String>?,
     val includeSmall: Boolean?,
+    /** 보내지 않거나 null이면 그대로 두고, 빈 문자열이면 이름을 지운다. */
+    val name: String? = null,
 )

@@ -22,6 +22,9 @@ class MemberJpaEntity(
     @Column(unique = true, nullable = false)
     val email: String,
 
+    @Column(length = Member.MAX_NAME_LENGTH)
+    val name: String? = null,
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val role: MemberRole = MemberRole.MEMBER,
@@ -35,6 +38,7 @@ class MemberJpaEntity(
     fun toDomain(): Member = Member(
         id = id,
         email = email,
+        name = name,
         role = role,
         isVerified = isVerified,
         createdAt = createdAt,
@@ -44,6 +48,7 @@ class MemberJpaEntity(
         fun from(member: Member): MemberJpaEntity = MemberJpaEntity(
             id = member.id,
             email = member.email,
+            name = member.name,
             role = member.role,
             isVerified = member.isVerified,
             createdAt = member.createdAt,

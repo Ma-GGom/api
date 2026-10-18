@@ -4,12 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>마꼼 구독 시작</title>
+  <style>
+    /* 휴대폰에서 1열이 되면 카드를 화면 폭에 맞춘다. (지원하지 않는 클라이언트는 272px 카드로 보인다) */
+    @media only screen and (max-width: 600px) {
+      .event-card { max-width: 100% !important; margin: 0 0 8px !important; }
+    }
+  </style>
 </head>
 <body style="margin:0; padding:0; background:#f5f5f5; font-family:'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5; padding:40px 0;">
     <tr>
       <td align="center">
-        <table width="500" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
 
           <!-- 헤더 -->
           <tr>
@@ -22,45 +28,17 @@
 
           <!-- 본문 -->
           <tr>
-            <td style="padding:30px;">
-              <p style="margin:0 0 8px; color:#333; font-size:20px; font-weight:700;">🎉 구독을 시작했어요!</p>
-              <p style="margin:0 0 12px; color:#666; font-size:14px; line-height:1.6;">
+            <td style="padding:28px 20px;">
+              <p style="margin:0 0 8px 4px; color:#333; font-size:20px; font-weight:700;">🎉 구독을 시작했어요!</p>
+              <p style="margin:0 0 14px 4px; color:#666; font-size:14px; line-height:1.6;">
                 설정하신 조건에 맞는 마라톤 대회 정보를 정기적으로 보내드릴게요.<br>
                 이런 형식으로 알림을 받아보실 수 있어요.
               </p>
 
-              <!-- 이벤트 목록 -->
-              <div th:each="event : ${events}">
-                <div style="border:1px solid #e0e7ff; border-radius:6px; padding:12px 16px; margin-bottom:8px;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td style="color:#312e81; font-size:14px; font-weight:700;">
-                            <span th:text="${event.title}">대회명</span>
-                            <span th:if="${event.badge != null}" th:text="${event.badge}"
-                                  style="display:inline-block; margin-left:6px; padding:2px 8px; background:#fee2e2; color:#b91c1c; font-size:11px; font-weight:700; border-radius:10px; vertical-align:middle;">접수 임박</span>
-                          </td>
-                      <td align="right" style="white-space:nowrap;">
-                        <a th:href="${event.linkUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding:4px 12px; background:#6366f1; color:#ffffff; font-size:12px; font-weight:600; text-decoration:none; border-radius:4px;">대회 사이트</a>
-                      </td>
-                    </tr>
-                  </table>
-                  <p style="margin:5px 0 0; color:#666; font-size:12px;">
-                    <strong>대회일:</strong> <span th:text="${#temporals.format(event.eventDate, 'yyyy.MM.dd')}">2026.04.20</span>
-                    <span style="color:#c7d2fe; margin:0 6px;">|</span>
-                    <strong>지역:</strong> <span th:text="${event.region}">수도권</span>
-                    <span style="color:#c7d2fe; margin:0 6px;">|</span>
-                    <strong>코스:</strong> <span th:text="${#strings.listJoin(event.distances, ', ')}">10K, 하프</span>
-                  </p>
-                  <p style="margin:3px 0 0; color:#999; font-size:12px;">
-                    <strong style="color:#888;">신청기간:</strong>
-                    <span th:text="${#temporals.format(event.regStartDate, 'yyyy.MM.dd')}">2026.03.01</span>
-                    ~
-                    <span th:text="${event.regEndDate != null ? #temporals.format(event.regEndDate, 'yyyy.MM.dd') : '미정'}">2026.04.01</span>
-                  </p>
-                </div>
-              </div>
+              <!-- 이벤트 목록 (넓은 화면 2열, 휴대폰 1열) -->
+              <div th:replace="~{mail/fragments/event-cards :: eventCards(${events})}"></div>
 
-              <p style="margin:0; color:#666; font-size:13px; line-height:1.6;">
+              <p style="margin:8px 0 0 4px; color:#666; font-size:13px; line-height:1.6;">
                 수신 조건(요일, 시간, 지역, 거리)은 마꼼 서비스에서 언제든지 변경하실 수 있어요.
               </p>
             </td>

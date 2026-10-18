@@ -143,6 +143,80 @@ class SubscriptionServiceTest {
         assertEquals(false, savedSlot.captured.includeSmall)
     }
 
+    @Test
+    @DisplayName("update - 이름을 보내면 앞뒤 공백을 지워 저장")
+    fun update_saves_trimmed_name() {
+        // given
+        val memberSlot = slot<Member>()
+        every { memberPort.findByEmail(any()) } returns member(id = 1L)
+        every { subscriptionPreferencePort.findByMemberId(1L) } returns pref(memberId = 1L)
+        every { subscriptionPreferencePort.save(any()) } answers { firstArg() }
+        every { memberPort.save(capture(memberSlot)) } answers { memberSlot.captured }
+
+        // when
+        service.update(nameOnlyCommand(name = "  김마꼼 "))
+
+        // then
+        assertEquals("김마꼼", memberSlot.captured.name)
+    }
+
+    @Test
+    @DisplayName("update - 빈 이름을 보내면 이름 삭제")
+    fun update_clears_name_with_blank_value() {
+        // given
+        val memberSlot = slot<Member>()
+        every { memberPort.findByEmail(any()) } returns member(id = 1L, name = "김마꼼")
+        every { subscriptionPreferencePort.findByMemberId(1L) } returns pref(memberId = 1L)
+        every { subscriptionPreferencePort.save(any()) } answers { firstArg() }
+        every { memberPort.save(capture(memberSlot)) } answers { memberSlot.captured }
+
+        // when
+        service.update(nameOnlyCommand(name = " "))
+
+        // then
+        assertEquals(null, memberSlot.captured.name)
+    }
+
+    @Test
+    @DisplayName("update - 이름을 보내지 않으면 회원 정보는 저장하지 않음")
+    fun update_keeps_name_when_not_sent() {
+        // given
+        every { memberPort.findByEmail(any()) } returns member(id = 1L, name = "김마꼼")
+        every { subscriptionPreferencePort.findByMemberId(1L) } returns pref(memberId = 1L)
+        every { subscriptionPreferencePort.save(any()) } answers { firstArg() }
+
+        // when
+        service.update(nameOnlyCommand(name = null))
+
+        // then
+        verify(exactly = 0) { memberPort.save(any()) }
+    }
+
+    @Test
+    @DisplayName("update - 이름이 20자를 넘으면 IllegalArgumentException")
+    fun update_rejects_too_long_name() {
+        // given
+        every { memberPort.findByEmail(any()) } returns member(id = 1L)
+        every { subscriptionPreferencePort.findByMemberId(1L) } returns pref(memberId = 1L)
+        every { subscriptionPreferencePort.save(any()) } answers { firstArg() }
+
+        // when & then
+        assertThrows<IllegalArgumentException> {
+            service.update(nameOnlyCommand(name = "가".repeat(21)))
+        }
+    }
+
+    @Test
+    @DisplayName("getByEmail - 등록한 이름을 함께 반환")
+    fun get_by_email_returns_name() {
+        // given
+        every { memberPort.findByEmail(any()) } returns member(id = 1L, name = "김마꼼")
+        every { subscriptionPreferencePort.findByMemberId(1L) } returns pref(memberId = 1L)
+
+        // when & then
+        assertEquals("김마꼼", service.getByEmail("user@test.com").name)
+    }
+
     // ── delete ──────────────────────────────────────────────────────────────
 
     @Test
@@ -189,9 +263,20 @@ class SubscriptionServiceTest {
 
     // ── helpers ──────────────────────────────────────────────────────────────
 
-    private fun member(id: Long) = Member(
+    private fun member(id: Long, name: String? = null) = Member(
         id = id,
         email = "user@test.com",
+        name = name,
+    )
+
+    private fun nameOnlyCommand(name: String?) = UpdateSubscriptionCommand(
+        email = "user@test.com",
+        receiveDays = null,
+        receiveTime = null,
+        prefRegions = null,
+        prefDistances = null,
+        includeSmall = null,
+        name = name,
     )
 
     private fun pref(memberId: Long) = SubscriptionPreference(

@@ -8,4 +8,5 @@ data class SubscriptionResponse(
     val prefRegions: List<String>,
     val prefDistances: List<String>,
     val includeSmall: Boolean,
+    val name: String? = null,
 )

@@ -39,6 +39,7 @@ class SubscriptionController(
             prefRegions = result.prefRegions,
             prefDistances = result.prefDistances,
             includeSmall = result.includeSmall,
+            name = result.name,
         )
     }
 
@@ -57,6 +58,7 @@ class SubscriptionController(
                 prefRegions = request.prefRegions,
                 prefDistances = request.prefDistances,
                 includeSmall = request.includeSmall,
+                name = request.name,
             )
         )
     }

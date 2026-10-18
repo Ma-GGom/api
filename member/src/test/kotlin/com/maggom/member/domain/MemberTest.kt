@@ -89,6 +89,26 @@ class MemberTest {
     }
 
     @Test
+    @DisplayName("이름은 완성형 한글만 허용")
+    fun korean_name_is_allowed() {
+        // when & then
+        listOf("김마꼼", "남궁민수", "가").forEach { name ->
+            assertDoesNotThrow { Member(email = "user@example.com", name = name) }
+        }
+    }
+
+    @Test
+    @DisplayName("이름에 한글 외 문자가 있으면 예외")
+    fun non_korean_name_throws_exception() {
+        // when & then
+        listOf("Kim", "러너123", "김 마꼼", "ㅋㅋㅋ", "김마꼼😀", "<script>", "김·마꼼").forEach { name ->
+            val ex = assertThrows<IllegalArgumentException> { Member(email = "user@example.com", name = name) }
+
+            assertEquals("이름은 공백 없이 한글로만 입력해 주세요.", ex.message)
+        }
+    }
+
+    @Test
     @DisplayName("rename - 앞뒤 공백을 지우고, 빈 값이면 이름 삭제")
     fun rename_trims_and_clears_blank() {
         // given

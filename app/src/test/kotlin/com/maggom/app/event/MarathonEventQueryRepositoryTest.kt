@@ -146,44 +146,6 @@ class MarathonEventQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("OPEN 이벤트는 regEndDate 오름차순 정렬")
-    fun open_events_sorted_by_reg_end_date_ascending() {
-        // given
-        save(status = MarathonEventStatus.OPEN, region = "서울특별시 마포구", regEndDate = now.plusDays(10))
-        save(status = MarathonEventStatus.OPEN, region = "경기도 성남시", regEndDate = now.plusDays(3))
-        save(status = MarathonEventStatus.OPEN, region = "인천광역시 연수구", regEndDate = now.plusDays(7))
-
-        // when
-        val results = repository.findOpenByRegions(listOf("수도권"))
-
-        // then
-        assertEquals(3, results.size)
-        assertTrue(results[0].regEndDate!!.isBefore(results[1].regEndDate!!))
-        assertTrue(results[1].regEndDate!!.isBefore(results[2].regEndDate!!))
-    }
-
-    @Test
-    @DisplayName("접수 시작이 먼 UPCOMING은 OPEN보다 뒤로 정렬")
-    fun distant_upcoming_events_sorted_after_open_events() {
-        // given
-        save(
-            status = MarathonEventStatus.UPCOMING,
-            region = "서울특별시 송파구",
-            regStartDate = now.plusDays(30),
-            regEndDate = now.plusDays(60),
-        )
-        save(status = MarathonEventStatus.OPEN, region = "서울특별시 마포구", regEndDate = now.plusDays(5))
-
-        // when
-        val results = repository.findOpenByRegions(listOf("수도권"))
-
-        // then
-        assertEquals(2, results.size)
-        assertEquals(MarathonEventStatus.OPEN, results[0].status)
-        assertEquals(MarathonEventStatus.UPCOMING, results[1].status)
-    }
-
-    @Test
     @DisplayName("includeSmall=false - SMALL 규모 대회 제외")
     fun exclude_small_scale_when_include_small_is_false() {
         // given
@@ -251,67 +213,6 @@ class MarathonEventQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("접수 임박(7일 내 오픈) UPCOMING이 접수중보다 먼저 정렬")
-    fun imminent_upcoming_events_sorted_first() {
-        // given
-        save(status = MarathonEventStatus.OPEN, region = "서울특별시 마포구", regEndDate = now.plusDays(30))
-        save(
-            status = MarathonEventStatus.UPCOMING,
-            region = "서울특별시 송파구",
-            regStartDate = now.plusDays(3),
-            regEndDate = now.plusDays(40),
-        )
-
-        // when
-        val results = repository.findOpenByRegions(listOf("수도권"))
-
-        // then
-        assertEquals(2, results.size)
-        assertEquals(MarathonEventStatus.UPCOMING, results[0].status)
-        assertEquals(MarathonEventStatus.OPEN, results[1].status)
-    }
-
-    @Test
-    @DisplayName("마감 임박 대회가 일반 접수중 대회보다 먼저 정렬")
-    fun closing_soon_events_sorted_before_other_open_events() {
-        // given
-        save(status = MarathonEventStatus.OPEN, region = "서울특별시 마포구", regEndDate = now.plusDays(30))
-        save(status = MarathonEventStatus.OPEN, region = "경기도 성남시", regEndDate = now.plusDays(2))
-
-        // when
-        val results = repository.findOpenByRegions(listOf("수도권"))
-
-        // then
-        assertEquals(2, results.size)
-        assertEquals("경기도 성남시", results[0].region)
-    }
-
-    @Test
-    @DisplayName("일반 접수중 대회는 최근 수집된 순으로 정렬")
-    fun other_open_events_sorted_by_newest_crawled_first() {
-        // given
-        save(
-            status = MarathonEventStatus.OPEN,
-            region = "서울특별시 마포구",
-            regEndDate = now.plusDays(30),
-            createdAt = now.minusDays(10),
-        )
-        save(
-            status = MarathonEventStatus.OPEN,
-            region = "경기도 성남시",
-            regEndDate = now.plusDays(60),
-            createdAt = now.minusDays(1),
-        )
-
-        // when
-        val results = repository.findOpenByRegions(listOf("수도권"))
-
-        // then
-        assertEquals(2, results.size)
-        assertEquals("경기도 성남시", results[0].region)
-    }
-
-    @Test
     @DisplayName("접수 종료일이 시작일보다 빠른 잘못된 데이터는 제외")
     fun events_with_inverted_registration_period_are_excluded() {
         // given
@@ -335,7 +236,6 @@ class MarathonEventQueryRepositoryTest {
         regStartDate: LocalDateTime = now.minusDays(1),
         regEndDate: LocalDateTime?,
         eventScale: EventScale = EventScale.UNKNOWN,
-        createdAt: LocalDateTime = now,
     ) {
         val entity = MarathonEventJpaEntity(
             title = "테스트 마라톤",
@@ -347,7 +247,6 @@ class MarathonEventQueryRepositoryTest {
             linkUrl = "https://example.com",
             status = status,
             eventScale = eventScale,
-            createdAt = createdAt,
             sourceName = "test",
             sourceUrl = "https://source.com",
             crawledAtKst = now,

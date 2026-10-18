@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<body>
+<!--
+  대회 카드 목록. 카드를 inline-block으로 두 장씩 놓아 넓은 화면에서는 2열,
+  카드 폭(272px)보다 좁은 휴대폰 화면에서는 자동으로 1열이 된다. (미디어 쿼리를 못 쓰는 메일 클라이언트용)
+  미디어 쿼리를 지원하는 클라이언트에서는 본문 템플릿의 .event-card 스타일로 1열 카드를 화면 폭에 맞춘다.
+  감싸는 칸의 안쪽 폭이 560px(= 카드 272 + 좌우 여백 4) x 2 이어야 한 줄에 두 장이 들어간다.
+-->
+<div th:fragment="eventCards(events)" style="font-size:0; line-height:0; text-align:left;">
+  <div th:each="event : ${events}" class="event-card"
+       style="display:inline-block; width:100%; max-width:272px; margin:0 4px 8px; vertical-align:top; font-size:14px; line-height:1.5; text-align:left;">
+    <div style="border:1px solid #e5e7eb; border-radius:8px; padding:12px 14px; background:#ffffff;">
+      <span th:text="${event.status.text}"
+            th:style="|display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; color:${event.status.textColor}; background:${event.status.backgroundColor};|">접수중</span>
+      <p th:text="${event.title}" style="margin:6px 0 6px; color:#111827; font-size:14px; font-weight:700; line-height:1.4; word-break:keep-all;">대회명</p>
+      <p style="margin:0; color:#4b5563; font-size:12px;">
+        <strong style="color:#374151;">대회일</strong>
+        <span th:text="${#temporals.format(event.eventDate, 'yyyy.MM.dd')}">2026.04.20</span>
+        <span style="color:#d1d5db; margin:0 4px;">|</span>
+        <span th:text="${event.region}">서울시 마포구</span>
+      </p>
+      <p style="margin:2px 0 0; color:#4b5563; font-size:12px;">
+        <strong style="color:#374151;">코스</strong>
+        <span th:text="${#strings.listJoin(event.distances, ', ')}">10K, HALF</span>
+      </p>
+      <p style="margin:2px 0 0; color:#9ca3af; font-size:12px;">
+        <strong style="color:#6b7280;">접수</strong>
+        <span th:text="${#temporals.format(event.regStartDate, 'yyyy.MM.dd')}">2026.03.01</span>
+        ~
+        <span th:text="${event.regEndDate != null ? #temporals.format(event.regEndDate, 'yyyy.MM.dd') : '미정'}">2026.04.01</span>
+      </p>
+      <a th:href="${event.linkUrl}" target="_blank" rel="noopener noreferrer"
+         style="display:inline-block; margin-top:10px; padding:5px 12px; background:#6366f1; color:#ffffff; font-size:12px; font-weight:600; text-decoration:none; border-radius:4px;">대회 사이트</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

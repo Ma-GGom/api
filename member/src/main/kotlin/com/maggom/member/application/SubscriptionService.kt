@@ -29,6 +29,7 @@ class SubscriptionService(
             prefRegions = pref.prefRegions,
             prefDistances = pref.prefDistances,
             includeSmall = pref.includeSmall,
+            name = member.name,
         )
     }
 
@@ -47,6 +48,7 @@ class SubscriptionService(
         )
 
         subscriptionPreferencePort.save(updated)
+        command.name?.let { memberPort.save(member.rename(it)) }
     }
 
     @Transactional

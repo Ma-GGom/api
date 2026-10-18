@@ -12,6 +12,7 @@ import com.maggom.member.port.out.MemberPort
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -20,6 +21,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import kotlin.test.assertEquals
 
 class NotificationSchedulerTest {
 
@@ -241,6 +243,44 @@ class NotificationSchedulerTest {
         verify(exactly = 1) { marathonEventPort.findOpenByRegions(listOf("수도권"), true) }
     }
 
+    @Test
+    @DisplayName("곧 접수 시작·새로 열림·마감 임박 대회가 많으면 최대 30개까지 발송")
+    fun many_priority_events_send_up_to_thirty() {
+        // given
+        every { memberPort.findAll() } returns listOf(member())
+        every { subscriptionQueryUseCase.getByEmail(any()) } returns pref()
+        every { marathonEventPort.findOpenByRegions(any(), any()) } returns List(35) {
+            event(distances = listOf("10K"), regStartDate = LocalDateTime.now().plusDays(2))
+        }
+        val sent = slot<List<MarathonEvent>>()
+        justRun { notificationMailPort.sendNotification(any(), capture(sent)) }
+
+        // when
+        scheduler.sendNotifications()
+
+        // then
+        assertEquals(30, sent.captured.size)
+    }
+
+    @Test
+    @DisplayName("우선 단계 대회가 적으면 나머지 대회로 20개까지 채워 발송")
+    fun few_priority_events_fill_up_to_twenty() {
+        // given
+        every { memberPort.findAll() } returns listOf(member())
+        every { subscriptionQueryUseCase.getByEmail(any()) } returns pref()
+        every { marathonEventPort.findOpenByRegions(any(), any()) } returns List(35) {
+            event(distances = listOf("10K"), regStartDate = LocalDateTime.now().plusDays(30))
+        }
+        val sent = slot<List<MarathonEvent>>()
+        justRun { notificationMailPort.sendNotification(any(), capture(sent)) }
+
+        // when
+        scheduler.sendNotifications()
+
+        // then
+        assertEquals(20, sent.captured.size)
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private fun member(email: String = "user@test.com") = Member(
@@ -262,16 +302,19 @@ class NotificationSchedulerTest {
         includeSmall = includeSmall,
     )
 
-    private fun event(distances: List<String>) = MarathonEvent(
+    private fun event(
+        distances: List<String>,
+        regStartDate: LocalDateTime = LocalDateTime.now().minusDays(1),
+    ) = MarathonEvent(
         id = 1L,
         title = "테스트 마라톤",
-        eventDate = LocalDate.now().plusMonths(1),
+        eventDate = LocalDate.now().plusMonths(2),
         region = "수도권",
         distances = distances,
-        regStartDate = LocalDateTime.now().minusDays(1),
-        regEndDate = LocalDateTime.now().plusDays(7),
+        regStartDate = regStartDate,
+        regEndDate = regStartDate.plusDays(20),
         linkUrl = "https://example.com",
-        status = MarathonEventStatus.OPEN,
+        status = if (regStartDate.isAfter(LocalDateTime.now())) MarathonEventStatus.UPCOMING else MarathonEventStatus.OPEN,
         sourceName = "test",
         sourceUrl = "https://source.com",
         crawledAtKst = LocalDateTime.now(),
